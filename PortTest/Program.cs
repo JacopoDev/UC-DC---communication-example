@@ -249,8 +249,61 @@ namespace PortTest
                         Console.WriteLine("Click 'enter' to continue");
                         Console.ReadLine();
                         break;
+                    
                     case EMessageTask.Prop:
+                        
+                        EUnityChanProps prop = EUnityChanProps.GamePad;
+                        int propSelection = -1;
+                        while (propSelection == -1)
+                        {
+                            Console.WriteLine("Select prop:");
+                            Console.WriteLine("0 - Gamepad");
+                            Console.WriteLine("1 - Headphone");
+                            Console.WriteLine("2 - Phone");
+                            string propSelectionText = Console.ReadLine();
+                            if (int.TryParse(propSelectionText, out int value))
+                            {
+                                if (value >= 0 && value <= (int)EUnityChanProps.Phone)
+                                {
+                                    prop = (EUnityChanProps)value;
+                                    propSelection = value;
+                                }
+                            }
+                        }
+
+                        bool? valueToSet = null;
+
+                        while (valueToSet == null)
+                        {
+                            Console.WriteLine("Enable? (y/n):");
+                            string valueInput = Console.ReadLine();
+                            valueInput = valueInput.ToLower();
+                            if (valueInput == "y") valueToSet = true;
+                            if (valueInput == "n") valueToSet = false;
+                        }
+                    
+                        // JSON object to send
+                        var dataProp = new UnityChanMessage()
+                        {
+                            Task = EMessageTask.Reaction,
+                            Content = new PropTaskContent()
+                            {
+                                Prop = prop,
+                                Value = (bool)valueToSet
+                            }
+                        };
+                
+                        // Serialize object to JSON
+                        string jsonProp = JsonConvert.SerializeObject(dataProp);
+                
+                        // Send JSON to the specified IP and port
+                        
+                        Task messengerProp = Task.Run(() => PortConnection.SendJson(jsonProp, "127.0.0.1", portValue));
+                        messengerProp.Wait();
+                        Console.WriteLine("Click 'enter' to continue");
+                        Console.ReadLine();
                         break;
+                    
                     case EMessageTask.GameRegister:
                         break;
                     default:
