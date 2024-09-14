@@ -44,6 +44,7 @@
     <ItemGroup>
         <Compile Include="Model\Enums.cs" />
         <Compile Include="Model\UnityChanMessage.cs" />
+        <Compile Include="PortConnection.cs" />
         <Compile Include="Program.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
     </ItemGroup>

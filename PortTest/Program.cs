@@ -8,90 +8,257 @@ using PortTest.Model;
 
 namespace PortTest
 {
+
     internal class Program
     {
         static void Main(string[] args)
         {
-            string cmd = "s";
-            string port = "s";
+            EMessageTask task = EMessageTask.Chat;
+            int inputTask = -1;
             int portValue = 0;
             bool portCorrect = false;
             
-            Console.WriteLine("Setting connection to localhost 127.0.0.1...");
             while (!portCorrect)
             {
+                Console.Clear();
+                Console.WriteLine("Setting connection to localhost 127.0.0.1...");
                 Console.WriteLine("Set port:");
-                port = Console.ReadLine();
-                if (int.TryParse(port, out portValue))
+                string input = Console.ReadLine();
+                if (int.TryParse(input, out portValue))
                 {
                     portCorrect = true;
                 }
             }
             
-            while (cmd != "q")
+            while (inputTask < 0 || inputTask > (int)EMessageTask.GameRegister)
             {
-                Console.WriteLine("Write message to Kohaku:");
-                cmd = Console.ReadLine();
-                if (cmd == "q")
-                {
-                    return;
-                }
+                Console.Clear();
+                Console.WriteLine("Select task to send:");
+                Console.WriteLine("1 - send chat message");
+                Console.WriteLine("2 - give reward");
+                Console.WriteLine("3 - modify relation");
+                Console.WriteLine("4 - set reaction");
+                Console.WriteLine("5 - set prop");
+                Console.WriteLine("6 - register / play game");
+                Console.WriteLine("7 - exit");
                 
-                // JSON object to send
-                var data = new UnityChanMessage()
+                string input = Console.ReadLine();
+                if (int.TryParse(input, out inputTask))
                 {
-                    Task = EMessageTask.Chat,
-                    Content = new ChatTaskContent()
+                    if (inputTask == 7)
                     {
-                        AnswerBack = true,
-                        Message = new Message()
-                        {
-                            role = "system",
-                            content = cmd,
-                            imageBase64 = null
-                        }
+                        return;
                     }
-                };
-
-                // Serialize object to JSON
-                string json = JsonConvert.SerializeObject(data);
-
-                // Send JSON to the specified IP and port
-                SendJson(json, "127.0.0.1", portValue);
-            }
-        }
-
-        static async void SendJson(string json, string ipAddress, int port)
-        {
-            try
-            {
-                using (TcpClient client = new TcpClient(ipAddress, port))
-                using (NetworkStream stream = client.GetStream())
-                {
-                    byte[] bytesToSend = Encoding.UTF8.GetBytes(json);
-
-                    // Send the data to the server
-                    stream.Write(bytesToSend, 0, bytesToSend.Length);
                     
-                    // Wait for the server's response
-                    byte[] buffer = new byte[1024];
-                    int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
-
-                    if (bytesRead > 0)
+                    if (inputTask > 0 && inputTask <= (int)EMessageTask.GameRegister)
                     {
-                        string response = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                        Console.WriteLine("Received from server: " + response);
+                        task = (EMessageTask)(inputTask - 1);
                     }
                     else
                     {
-                        Console.WriteLine("Server closed the connection or no data received.");
+                        inputTask = -1;
+                        continue;
                     }
-                    client.Close();
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"An error occurred: {ex.Message}");
+                else
+                {
+                    inputTask = -1;
+                    continue;
+                }
+                
+                switch (task)
+                {
+                    case EMessageTask.Chat:
+                        Console.WriteLine("Write message to Kohaku:");
+                        string cmd = Console.ReadLine();
+                    
+                        // JSON object to send
+                        var data = new UnityChanMessage()
+                        {
+                            Task = EMessageTask.Chat,
+                            Content = new ChatTaskContent()
+                            {
+                                AnswerBack = true,
+                                Message = new Message()
+                                {
+                                    role = "system",
+                                    content = cmd,
+                                    imageBase64 = null
+                                }
+                            }
+                        };
+                
+                        // Serialize object to JSON
+                        string json = JsonConvert.SerializeObject(data);
+                
+                        // Send JSON to the specified IP and port
+                        
+                        Task messenger = Task.Run(() => PortConnection.SendJsonAwaitAnswer(json, "127.0.0.1", portValue));
+                        messenger.Wait();
+                        Console.WriteLine("Click 'enter' to continue");
+                        Console.ReadLine();
+                        break;
+                    
+                    case EMessageTask.Reward:
+                        
+                        Console.WriteLine("Write reward message:");
+                        string rewardText = Console.ReadLine();
+
+                        int skillReward = -1;
+                        while (skillReward == -1)
+                        {
+                            Console.WriteLine("Write skill points reward amount:");
+                            string skillRewardText = Console.ReadLine();
+                            int.TryParse(skillRewardText, out skillReward);
+                        }
+
+                        int? victoryReward = -1;
+                        while (victoryReward == -1)
+                        {
+                            Console.WriteLine("Write victory points reward amount:");
+                            string victoryRewardText = Console.ReadLine();
+                            if (int.TryParse(victoryRewardText, out int value))
+                            {
+                                if (value == 0)
+                                {
+                                    victoryReward = null;
+                                }
+                                else
+                                {
+                                    victoryReward = value;
+                                }
+                            }
+                        }
+                    
+                        // JSON object to send
+                        var dataReward = new UnityChanMessage()
+                        {
+                            Task = EMessageTask.Reward,
+                            Content = new RewardTaskContent()
+                            {
+                                Message = rewardText,
+                                SkillPoints = skillReward,
+                                VictoryPoints = victoryReward
+                            }
+                        };
+                
+                        // Serialize object to JSON
+                        string jsonReward = JsonConvert.SerializeObject(dataReward);
+                
+                        // Send JSON to the specified IP and port
+                        
+                        Task messengerReward = Task.Run(() => PortConnection.SendJson(jsonReward, "127.0.0.1", portValue));
+                        messengerReward.Wait();
+                        Console.WriteLine("Click 'enter' to continue");
+                        Console.ReadLine();
+                        
+                        break;
+                    case EMessageTask.Relation:
+                        
+                        int moodModifier = -1;
+                        while (moodModifier == -1)
+                        {
+                            Console.WriteLine("Write mood modifier amount:");
+                            string moodModifierText = Console.ReadLine();
+                            int.TryParse(moodModifierText, out moodModifier);
+                        }
+
+                        int? relationModifier = -1;
+                        while (relationModifier == -1)
+                        {
+                            Console.WriteLine("Write relation modifier amount:");
+                            string relationModifierText = Console.ReadLine();
+                            if (int.TryParse(relationModifierText, out int value))
+                            {
+                                if (value == 0)
+                                {
+                                    relationModifier = null;
+                                }
+                                else
+                                {
+                                    relationModifier = value;
+                                }
+                            }
+                        }
+                    
+                        // JSON object to send
+                        var dataRelation = new UnityChanMessage()
+                        {
+                            Task = EMessageTask.Relation,
+                            Content = new RelationTaskContent()
+                            {
+                                MoodModifier = moodModifier,
+                                RelationModifier = relationModifier
+                            }
+                        };
+                
+                        // Serialize object to JSON
+                        string jsonRelation = JsonConvert.SerializeObject(dataRelation);
+                
+                        // Send JSON to the specified IP and port
+                        
+                        Task messengerRelation = Task.Run(() => PortConnection.SendJson(jsonRelation, "127.0.0.1", portValue));
+                        messengerRelation.Wait();
+                        Console.WriteLine("Click 'enter' to continue");
+                        Console.ReadLine();
+                        
+                        break;
+                    case EMessageTask.Reaction:
+
+                        EExpressedEmotion emotion = EExpressedEmotion.None;
+                        int reactionSelection = -1;
+                        while (reactionSelection == -1)
+                        {
+                            Console.WriteLine("Select reaction to play:");
+                            Console.WriteLine("0 - none");
+                            Console.WriteLine("1 - happy");
+                            Console.WriteLine("2 - angry");
+                            Console.WriteLine("3 - embarrassed");
+                            Console.WriteLine("4 - flirty");
+                            Console.WriteLine("5 - sad");
+                            Console.WriteLine("6 - surprised");
+                            Console.WriteLine("7 - closedeyes");
+                            string reactionSelectionText = Console.ReadLine();
+                            if (int.TryParse(reactionSelectionText, out int value))
+                            {
+                                if (value >= 0 && value <= (int)EExpressedEmotion.ClosedEyes)
+                                {
+                                    emotion = (EExpressedEmotion)value;
+                                    reactionSelection = value;
+                                }
+                            }
+                        }
+                    
+                        // JSON object to send
+                        var dataReaction = new UnityChanMessage()
+                        {
+                            Task = EMessageTask.Reaction,
+                            Content = new ReactionTaskContent()
+                            {
+                                Emotion = emotion
+                            }
+                        };
+                
+                        // Serialize object to JSON
+                        string jsonReaction = JsonConvert.SerializeObject(dataReaction);
+                
+                        // Send JSON to the specified IP and port
+                        
+                        Task messengerReaction = Task.Run(() => PortConnection.SendJson(jsonReaction, "127.0.0.1", portValue));
+                        messengerReaction.Wait();
+                        Console.WriteLine("Click 'enter' to continue");
+                        Console.ReadLine();
+                        break;
+                    case EMessageTask.Prop:
+                        break;
+                    case EMessageTask.GameRegister:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+
+                }
+                
+                inputTask = -1;
             }
         }
     }
