@@ -72,29 +72,7 @@ namespace PortTest
                         Console.WriteLine("Write message to Kohaku:");
                         string cmd = Console.ReadLine();
                     
-                        // JSON object to send
-                        var data = new UnityChanMessage()
-                        {
-                            Task = task,
-                            Content = new ChatTaskContent()
-                            {
-                                AnswerBack = true,
-                                Message = new Message()
-                                {
-                                    role = "system",
-                                    content = cmd,
-                                    imageBase64 = null
-                                }
-                            }
-                        };
-                
-                        // Serialize object to JSON
-                        string json = JsonConvert.SerializeObject(data);
-                
-                        // Send JSON to the specified IP and port
-                        
-                        Task messenger = Task.Run(() => PortConnection.SendJsonAwaitAnswer(json, "127.0.0.1", portValue));
-                        messenger.Wait();
+                        PortConnection.SendChat(cmd, portValue);
                         Console.WriteLine("Click 'enter' to continue");
                         Console.ReadLine();
                         break;
@@ -130,25 +108,7 @@ namespace PortTest
                             }
                         }
                     
-                        // JSON object to send
-                        var dataReward = new UnityChanMessage()
-                        {
-                            Task = task,
-                            Content = new RewardTaskContent()
-                            {
-                                Message = rewardText,
-                                SkillPoints = skillReward,
-                                VictoryPoints = victoryReward
-                            }
-                        };
-                
-                        // Serialize object to JSON
-                        string jsonReward = JsonConvert.SerializeObject(dataReward);
-                
-                        // Send JSON to the specified IP and port
-                        
-                        Task messengerReward = Task.Run(() => PortConnection.SendJson(jsonReward, "127.0.0.1", portValue));
-                        messengerReward.Wait();
+                        PortConnection.SendReward(rewardText, skillReward, victoryReward, portValue);
                         Console.WriteLine("Click 'enter' to continue");
                         Console.ReadLine();
                         
@@ -181,24 +141,7 @@ namespace PortTest
                             }
                         }
                     
-                        // JSON object to send
-                        var dataRelation = new UnityChanMessage()
-                        {
-                            Task = task,
-                            Content = new RelationTaskContent()
-                            {
-                                MoodModifier = moodModifier,
-                                RelationModifier = relationModifier
-                            }
-                        };
-                
-                        // Serialize object to JSON
-                        string jsonRelation = JsonConvert.SerializeObject(dataRelation);
-                
-                        // Send JSON to the specified IP and port
-                        
-                        Task messengerRelation = Task.Run(() => PortConnection.SendJson(jsonRelation, "127.0.0.1", portValue));
-                        messengerRelation.Wait();
+                        PortConnection.SendRelation(moodModifier, relationModifier, portValue);
                         Console.WriteLine("Click 'enter' to continue");
                         Console.ReadLine();
                         
@@ -230,23 +173,7 @@ namespace PortTest
                             }
                         }
                     
-                        // JSON object to send
-                        var dataReaction = new UnityChanMessage()
-                        {
-                            Task = task,
-                            Content = new ReactionTaskContent()
-                            {
-                                Emotion = emotion
-                            }
-                        };
-                
-                        // Serialize object to JSON
-                        string jsonReaction = JsonConvert.SerializeObject(dataReaction);
-                
-                        // Send JSON to the specified IP and port
-                        
-                        Task messengerReaction = Task.Run(() => PortConnection.SendJson(jsonReaction, "127.0.0.1", portValue));
-                        messengerReaction.Wait();
+                        PortConnection.SendReaction(emotion, portValue);
                         Console.WriteLine("Click 'enter' to continue");
                         Console.ReadLine();
                         break;
@@ -283,24 +210,7 @@ namespace PortTest
                             if (valueInput == "n") valueToSet = false;
                         }
                     
-                        // JSON object to send
-                        var dataProp = new UnityChanMessage()
-                        {
-                            Task = task,
-                            Content = new PropTaskContent()
-                            {
-                                Prop = prop,
-                                Value = (bool)valueToSet
-                            }
-                        };
-                
-                        // Serialize object to JSON
-                        string jsonProp = JsonConvert.SerializeObject(dataProp);
-                
-                        // Send JSON to the specified IP and port
-                        
-                        Task messengerProp = Task.Run(() => PortConnection.SendJson(jsonProp, "127.0.0.1", portValue));
-                        messengerProp.Wait();
+                        PortConnection.SendSetProp(prop, valueToSet, portValue);
                         Console.WriteLine("Click 'enter' to continue");
                         Console.ReadLine();
                         break;
@@ -350,29 +260,7 @@ namespace PortTest
                             if (valueInput == "n") isEnableRandomComments = false;
                         }
                     
-                        // JSON object to send
-                        var dataGameRegister = new UnityChanMessage()
-                        {
-                            Task = task,
-                            Content = new GameRegisterContent()
-                            {
-                                GameName = gameTitle,
-                                Description = gameDescription,
-                                ExecutablePath = gameExecutablePath,
-                                ImagePath = gameImagePath,
-                                IsRegister = isGameToRegister,
-                                IsPlay = isGameToPlay,
-                                IsUnityChanBasicComments = (bool)isEnableRandomComments
-                            }
-                        };
-                
-                        // Serialize object to JSON
-                        string jsonGameRegister = JsonConvert.SerializeObject(dataGameRegister);
-                
-                        // Send JSON to the specified IP and port
-                        
-                        Task messengerGameRegister = Task.Run(() => PortConnection.SendJson(jsonGameRegister, "127.0.0.1", portValue));
-                        messengerGameRegister.Wait();
+                        PortConnection.SendGameRegister(gameTitle, gameDescription, gameExecutablePath, gameImagePath, isGameToRegister, isGameToPlay, isEnableRandomComments, portValue);
                         Console.WriteLine("Click 'enter' to continue");
                         Console.ReadLine();
                         
