@@ -21,10 +21,9 @@ namespace PortTest
             EMessageTask task = EMessageTask.Chat;
             int inputTask = -1;
             int portValue = 0;
-            bool portCorrect = false;
             bool? answerBack = null;
 
-            AskPortValue(portCorrect);
+            portValue = AskPortValue();
 
             while (inputTask < 0 || inputTask > (int)EMessageTask.GameRegister)
             {
@@ -107,18 +106,17 @@ namespace PortTest
             return inputTask;
         }
 
-        private static void AskPortValue(bool portCorrect)
+        private static int AskPortValue()
         {
-            int portValue;
-            while (!portCorrect)
+            while (true)
             {
                 Console.Clear();
                 Console.WriteLine("Setting connection to localhost 127.0.0.1...");
                 Console.WriteLine("Set port:");
                 string input = Console.ReadLine();
-                if (int.TryParse(input, out portValue))
+                if (int.TryParse(input, out int portValue))
                 {
-                    portCorrect = true;
+                    return portValue;
                 }
             }
         }

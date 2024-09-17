@@ -48,10 +48,11 @@ namespace PortTest
             }
         }
 
-        private static async Task<ApiResponse> SendData(bool requestAnswer, int portValue, UnityChanMessage data)
+        private static async Task<ApiResponse> SendData(int portValue, UnityChanMessage data)
         {
             string json = JsonConvert.SerializeObject(data);
-            if (requestAnswer)
+            if (data.AnswerBack != null &&
+                data.AnswerBack == true)
             {
                 ApiResponse response = await SendJsonAwaitAnswer(json, IPAddress.Loopback.ToString(), portValue);
                 return response;
@@ -69,6 +70,7 @@ namespace PortTest
             var data = new UnityChanMessage()
             {
                 Task = EMessageTask.Chat,
+                AnswerBack = requestAnswer,
                 Content = new ChatTaskContent()
                 {
                     Message = new Message()
@@ -80,7 +82,7 @@ namespace PortTest
                 }
             };
 
-            return await SendData(requestAnswer, portValue, data);
+            return await SendData(portValue, data);
         }
 
         public static async Task<ApiResponse> SendReward(string rewardText, int skillReward, int? victoryReward, bool requestAnswer, int portValue)
@@ -88,6 +90,7 @@ namespace PortTest
             var data = new UnityChanMessage()
             {
                 Task = EMessageTask.Reward,
+                AnswerBack = requestAnswer,
                 Content = new RewardTaskContent()
                 {
                     Message = rewardText,
@@ -96,7 +99,7 @@ namespace PortTest
                 }
             };
 
-            return await SendData(requestAnswer, portValue, data);
+            return await SendData(portValue, data);
         }
 
         public static async Task<ApiResponse> SendRelation(int moodModifier, int? relationModifier, bool requestAnswer, int portValue)
@@ -104,6 +107,7 @@ namespace PortTest
             var data = new UnityChanMessage()
             {
                 Task = EMessageTask.Relation,
+                AnswerBack = requestAnswer,
                 Content = new RelationTaskContent()
                 {
                     MoodModifier = moodModifier,
@@ -111,7 +115,7 @@ namespace PortTest
                 }
             };
 
-            return await SendData(requestAnswer, portValue, data);
+            return await SendData(portValue, data);
         }
 
         public static async Task<ApiResponse> SendReaction(EExpressedEmotion emotion, bool requestAnswer, int portValue)
@@ -119,13 +123,14 @@ namespace PortTest
             var data = new UnityChanMessage()
             {
                 Task = EMessageTask.Reaction,
+                AnswerBack = requestAnswer,
                 Content = new ReactionTaskContent()
                 {
                     Emotion = emotion
                 }
             };
 
-            return await SendData(requestAnswer, portValue, data);
+            return await SendData(portValue, data);
         }
 
         public static async Task<ApiResponse> SendSetProp(EUnityChanProps prop, bool valueToSet, bool requestAnswer, int portValue)
@@ -133,6 +138,7 @@ namespace PortTest
             var data = new UnityChanMessage()
             {
                 Task = EMessageTask.Prop,
+                AnswerBack = requestAnswer,
                 Content = new PropTaskContent()
                 {
                     Prop = prop,
@@ -140,7 +146,7 @@ namespace PortTest
                 }
             };
 
-            return await SendData(requestAnswer, portValue, data);
+            return await SendData(portValue, data);
         }
 
         public static async Task<ApiResponse> SendGameRegister(string gameTitle, string gameDescription, string gameExecutablePath,
@@ -149,6 +155,7 @@ namespace PortTest
             var data = new UnityChanMessage()
             {
                 Task = EMessageTask.GameRegister,
+                AnswerBack = requestAnswer,
                 Content = new GameRegisterContent()
                 {
                     GameName = gameTitle,
@@ -161,7 +168,7 @@ namespace PortTest
                 }
             };
 
-            return await SendData(requestAnswer, portValue, data);
+            return await SendData(portValue, data);
         }
     }
 }
