@@ -9,7 +9,6 @@ namespace PortTest.Model
 
     public class ChatTaskContent : UnityChanContent
     {
-        public bool? AnswerBack;
         public Message Message;
     }
 
@@ -56,6 +55,7 @@ namespace PortTest.Model
     public class UnityChanMessage
     {
         public EMessageTask Task;
+        public bool? AnswerBack;
         public UnityChanContent Content;
     }
 }

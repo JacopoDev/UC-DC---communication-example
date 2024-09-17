@@ -1,6 +1,5 @@
 ﻿namespace PortTest.Model
 {
-    
     public enum EMessageTask
     {
         Chat,
